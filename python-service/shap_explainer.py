@@ -66,7 +66,7 @@ class ShapExplainer:
             return False
     
     def explain_token_level(self, text, prediction_label):
-        """Generate token-level SHAP explanations"""
+        """Generate token-level SHAP explanations for text plot visualization"""
         try:
             if self.explainer is None:
                 if not self.initialize():
@@ -75,7 +75,8 @@ class ShapExplainer:
             # Get SHAP values - pass text as string
             shap_values = self.explainer(text)
             
-            # Extract token-level explanations
+            # Extract token-level explanations for text plot
+            # Get the original text and tokenize it
             tokens = self.tokenizer.tokenize(text)
             
             # Handle different SHAP output formats
@@ -93,34 +94,57 @@ class ShapExplainer:
                 except ValueError:
                     values = values[:, 0]  # Default to first class
             
-            # Create token importance list
+            # Create token importance list optimized for text plot
             token_values = []
             for i, token in enumerate(tokens):
                 if i < len(values):
-                    importance = float(values[i])
+                    shap_value = float(values[i])
                     token_values.append({
                         'token': token,
-                        'value': importance,
-                        'importance': abs(importance)
+                        'value': shap_value,
+                        'importance': abs(shap_value),
+                        'position': i
                     })
             
-            return token_values
+            # Also add position to feature-level results for consistency
+            for i, token_val in enumerate(token_values):
+                if 'position' not in token_val:
+                    token_val['position'] = i
+            
+            # Also return the base value and prediction for text plot
+            return {
+                'token_values': token_values,
+                'base_value': 0.0,  # Will be set by caller
+                'prediction': prediction_label,
+                'text': text
+            }
             
         except Exception as e:
             logger.error(f"Error generating token-level SHAP: {e}")
             # Return a simple token importance as fallback
             try:
                 tokens = self.tokenizer.tokenize(text)
-                return [
-                    {
-                        'token': token,
-                        'value': 0.1,
-                        'importance': 0.1
-                    }
-                    for token in tokens[:10]
-                ]
+                return {
+                    'token_values': [
+                        {
+                            'token': token,
+                            'value': 0.1,
+                            'importance': 0.1,
+                            'position': i
+                        }
+                        for i, token in enumerate(tokens[:10])
+                    ],
+                    'base_value': 0.0,
+                    'prediction': prediction_label,
+                    'text': text
+                }
             except:
-                return []
+                return {
+                    'token_values': [],
+                    'base_value': 0.0,
+                    'prediction': prediction_label,
+                    'text': text
+                }
     
     def explain_feature_level(self, text, prediction_label):
         """Generate feature-level SHAP explanations"""

@@ -122,8 +122,13 @@ def explain():
         }
         
         if level in ['token', 'both']:
-            token_values = shap_explainer.explain_token_level(text, prediction_label)
-            result['token_values'] = token_values
+            token_data = shap_explainer.explain_token_level(text, prediction_label)
+            # Handle both old format (list) and new format (dict)
+            if isinstance(token_data, dict):
+                result['token_values'] = token_data.get('token_values', [])
+                result['text_plot_data'] = token_data
+            else:
+                result['token_values'] = token_data
         
         if level in ['feature', 'both']:
             feature_values = shap_explainer.explain_feature_level(text, prediction_label)

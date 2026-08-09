@@ -3,6 +3,7 @@ import SymptomInput from './components/SymptomInput';
 import ClassificationResult from './components/ClassificationResult';
 import ShapTokenVisualization from './components/ShapTokenVisualization';
 import ShapFeatureVisualization from './components/ShapFeatureVisualization';
+import ShapTextPlot from './components/ShapTextPlot';
 import { predictionApi } from './services/api';
 import { PredictionResponse, ShapResponse } from './types';
 
@@ -73,6 +74,9 @@ const App: React.FC = () => {
             
             {shapData && (
               <>
+                {shapData.text_plot_data && (
+                  <ShapTextPlot textPlotData={shapData.text_plot_data} />
+                )}
                 {shapData.token_values && (
                   <ShapTokenVisualization tokenValues={shapData.token_values} />
                 )}
