@@ -130,6 +130,12 @@ def explain():
             else:
                 result['token_values'] = token_data
         
+        # Generate actual SHAP plot (as in documentation)
+        if level in ['token', 'both']:
+            shap_plot_data = shap_explainer.generate_shap_plot(text, prediction_label)
+            if shap_plot_data:
+                result['shap_plot'] = shap_plot_data
+        
         if level in ['feature', 'both']:
             feature_values = shap_explainer.explain_feature_level(text, prediction_label)
             result['feature_values'] = feature_values

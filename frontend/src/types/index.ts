@@ -28,10 +28,18 @@ export interface ShapTextPlotData {
   text: string;
 }
 
+export interface ShapPlotData {
+  plot_base64: string;
+  plot_type: string;
+  prediction: string;
+  text: string;
+}
+
 export interface ShapResponse {
   token_values?: ShapTokenValue[];
   feature_values?: ShapFeatureValue[];
   text_plot_data?: ShapTextPlotData;
+  shap_plot?: ShapPlotData;
   base_value: number;
   prediction: string;
 }

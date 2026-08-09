@@ -5,6 +5,11 @@ from transformers import AutoTokenizer
 import config
 import logging
 from model_loader import model_loader
+import matplotlib
+matplotlib.use('Agg')  # Use non-interactive backend
+import matplotlib.pyplot as plt
+import base64
+import io
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -30,8 +35,21 @@ class ShapExplainer:
             
             # Create a wrapper function for SHAP
             def model_wrapper(texts):
+                # Handle different input types from SHAP
+                if isinstance(texts, str):
+                    texts = [texts]
+                elif isinstance(texts, list) and len(texts) > 0 and isinstance(texts[0], list):
+                    # Handle batch of pretokenized examples
+                    texts = [' '.join(t) for t in texts]
+                
+                # Filter out any non-string inputs
+                valid_texts = [t for t in texts if isinstance(t, str)]
+                if not valid_texts:
+                    # Return default output if no valid texts
+                    return np.zeros((1, len(config.CLASS_LABELS)))
+                
                 inputs = self.tokenizer(
-                    texts,
+                    valid_texts,
                     return_tensors='pt',
                     truncation=True,
                     padding=True,
@@ -145,6 +163,63 @@ class ShapExplainer:
                     'prediction': prediction_label,
                     'text': text
                 }
+    
+    def generate_shap_plot(self, text, prediction_label):
+        """Generate actual SHAP text plot using matplotlib (exactly as in SHAP docs)"""
+        try:
+            if self.explainer is None:
+                if not self.initialize():
+                    raise ValueError("Could not initialize SHAP explainer")
+            
+            # Get SHAP values - pass as string for single example
+            shap_values = self.explainer(text)
+            
+            # Create figure for SHAP plot
+            plt.figure(figsize=(12, 6))
+            
+            # Generate the SHAP text plot exactly as in documentation
+            # Handle different shap_values formats
+            if hasattr(shap_values, 'values'):
+                # If it's a multi-class output, get the specific class
+                if len(shap_values.values.shape) > 1:
+                    try:
+                        class_idx = config.CLASS_LABELS.index(prediction_label)
+                        # Create a single-class shap_values object
+                        from shap import Explanation
+                        single_class_values = shap_values.values[:, class_idx]
+                        single_class_shap = Explanation(
+                            values=single_class_values,
+                            base_values=shap_values.base_values[class_idx] if len(shap_values.base_values.shape) > 0 else shap_values.base_values,
+                            data=shap_values.data
+                        )
+                        shap.plots.text(single_class_shap, display=False)
+                    except (ValueError, IndexError):
+                        # Fallback to first class
+                        shap.plots.text(shap_values, display=False)
+                else:
+                    shap.plots.text(shap_values, display=False)
+            else:
+                shap.plots.text(shap_values, display=False)
+            
+            # Save plot to base64 string
+            buf = io.BytesIO()
+            plt.savefig(buf, format='png', bbox_inches='tight', dpi=150)
+            buf.seek(0)
+            plot_base64 = base64.b64encode(buf.read()).decode('utf-8')
+            plt.close()
+            
+            return {
+                'plot_base64': plot_base64,
+                'plot_type': 'text',
+                'prediction': prediction_label,
+                'text': text
+            }
+            
+        except Exception as e:
+            logger.error(f"Error generating SHAP plot: {e}")
+            import traceback
+            logger.error(traceback.format_exc())
+            return None
     
     def explain_feature_level(self, text, prediction_label):
         """Generate feature-level SHAP explanations"""
