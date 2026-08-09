@@ -30,8 +30,18 @@ class ModelLoader:
             # Check if it's a Hugging Face model directory or a single .pt file
             if model_path.is_dir():
                 # Load from Hugging Face format
-                self.model = AutoModelForSequenceClassification.from_pretrained(str(model_path))
-                tokenizer_path = model_path
+                try:
+                    self.model = AutoModelForSequenceClassification.from_pretrained(str(model_path))
+                    tokenizer_path = model_path
+                except Exception as e:
+                    logger.warning(f"Failed to load model from {model_path}: {e}")
+                    # Try loading as PhoBert specifically
+                    logger.info("Attempting to load as PhoBert model...")
+                    self.model = AutoModelForSequenceClassification.from_pretrained(
+                        "vinai/phobert-base",
+                        num_labels=len(config.CLASS_LABELS)
+                    )
+                    tokenizer_path = "vinai/phobert-base"
             else:
                 # Load from .pt file - this assumes you have a separate tokenizer
                 self.model = torch.load(model_path, map_location=self.device)

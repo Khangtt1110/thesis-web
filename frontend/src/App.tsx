@@ -41,10 +41,10 @@ const App: React.FC = () => {
       <div className="max-w-4xl mx-auto">
         <div className="text-center mb-8">
           <h1 className="text-4xl font-bold text-gray-800 mb-2">
-            Disease Symptom Classifier
+            Phân Loại Triệu Chứng Bệnh
           </h1>
           <p className="text-lg text-gray-600">
-            AI-powered disease classification with explainable AI insights
+            Hệ thống phân loại bệnh powered by AI với giải thích chi tiết
           </p>
         </div>
 
@@ -89,8 +89,11 @@ const App: React.FC = () => {
         )}
 
         <div className="mt-12 text-center text-sm text-gray-500">
-          <p>Powered by local PyTorch model with SHAP explainability</p>
-          <p className="mt-1">Note: This is a demonstration tool and should not be used for medical diagnosis</p>
+          <p>Powered by PhoBert model với SHAP explainability</p>
+          <p className="mt-1">Lưu ý: Đây là công cụ demo và không nên dùng cho chẩn đoán y tế</p>
+          <p className="mt-2">
+            <strong>Ví dụ:</strong> "Tôi bị sốt cao, ho khan và đau họng" hoặc "Đau đầu, buồn nôn và mệt mỏi"
+          </p>
         </div>
       </div>
     </div>

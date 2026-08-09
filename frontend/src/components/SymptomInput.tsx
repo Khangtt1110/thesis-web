@@ -33,7 +33,7 @@ const SymptomInput: React.FC<SymptomInputProps> = ({ onSubmit, isLoading }) => {
             id="symptoms"
             value={text}
             onChange={(e) => setText(e.target.value)}
-            placeholder="Describe your symptoms... (e.g., 'I have a fever, cough, and headache')"
+            placeholder="Mô tả triệu chứng của bạn... (e.g., 'Tôi bị sốt, ho và đau đầu')"
             className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
             rows={4}
             disabled={isLoading}

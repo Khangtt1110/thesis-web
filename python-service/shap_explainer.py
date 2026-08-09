@@ -189,9 +189,16 @@ class ShapExplainer:
             return []
     
     def _extract_features(self, text):
-        """Extract potential symptom features from text"""
-        # Common symptom keywords
+        """Extract potential symptom features from text (Vietnamese and English)"""
+        # Common symptom keywords in Vietnamese and English
         symptom_keywords = [
+            # Vietnamese symptoms
+            'sốt', 'ho', 'đau đầu', 'buồn nôn', 'nôn',
+            'tiêu chảy', 'mệt mỏi', 'đau người', 'đau họng',
+            'chảy mũi', 'nghẹt mũi', 'khó thở',
+            'đau ngực', 'chóng mặt', 'phát ban', 'sưng',
+            'rét run', 'vã mồ hôi', 'không ngon miệng', 'đau bụng',
+            # English symptoms (for bilingual support)
             'fever', 'cough', 'headache', 'nausea', 'vomiting',
             'diarrhea', 'fatigue', 'body ache', 'sore throat',
             'runny nose', 'congestion', 'shortness of breath',
@@ -208,7 +215,7 @@ class ShapExplainer:
         
         # Also extract individual words as potential features
         words = text_lower.split()
-        found_features.extend([word for word in words if len(word) > 3])
+        found_features.extend([word for word in words if len(word) > 2])
         
         return list(set(found_features))  # Remove duplicates
 
